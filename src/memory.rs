@@ -6,17 +6,24 @@ big-endian
 */
 
 pub struct Memory {
-    pub memory: [u8; 4096]
+    pub address: [u8; 4096]
 }
 
 impl Memory {
     pub fn new() -> Memory {
-        return Memory {
-            memory: [0; 4096]
-        }
+        let mut m = Memory {
+            address: [0; 4096]
+        };
+        m.address[0x200] = 0x60;
+        m.address[0x201] = 0x01;
+        m.address[0x202] = 0x70;
+        m.address[0x203] = 0x02;
+        return m;
     }
     // 设置内存
     pub fn set(&mut self, data: [u8; 3216]) {
-        let mut m = &self.memory[0x200..];
+        for i in 0..3216 {
+            self.address[0x200 + i] = data[i];
+        }
     }
 }
