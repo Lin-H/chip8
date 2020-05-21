@@ -14,16 +14,26 @@ impl Memory {
         let mut m = Memory {
             address: [0; 4096]
         };
-        m.address[0x200] = 0x60;
-        m.address[0x201] = 0x01;
-        m.address[0x202] = 0x70;
-        m.address[0x203] = 0x02;
+        m.set(0x200, vec![0x6002, 0x7002]);
         return m;
     }
     // 设置内存
-    pub fn set(&mut self, data: [u8; 3216]) {
-        for i in 0..3216 {
-            self.address[0x200 + i] = data[i];
+    pub fn set(&mut self, pos: usize, data: Vec<u16>) {
+        let length = data.len();
+        let mut i = 0;
+        while i < length {
+            self.address[pos + i * 2] = (data[i] >> 8) as u8;
+            self.address[pos + i * 2 + 1] = data[i] as u8;
+            i += 1;
         }
     }
+}
+
+#[test]
+fn test_memory_set() {
+    let mem = Memory::new();
+    assert_eq!(mem.address[0x200], 0x60);
+    assert_eq!(mem.address[0x201], 0x02);
+    assert_eq!(mem.address[0x202], 0x70);
+    assert_eq!(mem.address[0x203], 0x02);
 }
