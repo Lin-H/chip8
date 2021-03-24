@@ -25,16 +25,18 @@ impl CPU {
         }
     }
     pub fn run(&mut self) {
-        let op = self.get_op();
-        self.exec(op);
-        self.next();
+        loop {
+            let op = self.get_op();
+            if op == 0 { break }
+            self.exec(op);
+            self.next();
+        }
     }
     fn exec(&mut self, op: u16) {
         let op0 = (op & 0xf000) >> 12;
         let op1 = (op & 0x0f00) >> 8;
         let op2 = (op & 0x00f0) >> 4;
         let op3 = op & 0x000f;
-        // let op = ;
         println!("{:?}, {:?}, {:?}, {:?}", op0, op1, op2, op3);
         match (op0, op1, op2, op3) {
             (0, 0, 0, 0) => println!("No Operation"),
@@ -57,14 +59,14 @@ impl CPU {
             },
             // Skip next Instruction if VX=KK
             (3, x, k1, k2) => {
-                let kk = (k1 << 4 + k2) as u8;
+                let kk = ((k1 << 4) + k2) as u8;
                 if self.v[x as usize] == kk {
                     self.next();
                 }
             },
             // Skip next Instruction if VX≠KK.
             (4, x, k1, k2) => {
-                let kk = (k1 << 4 + k2) as u8;
+                let kk = ((k1 << 4) + k2) as u8;
                 if self.v[x as usize] != kk {
                     self.next();
                 }
@@ -77,7 +79,38 @@ impl CPU {
             },
             // Assign Hex value KK to Register VX
             (6, x, k1, k2) => {
-                self.v[x as usize] = (k1 << 4 + k2) as u8;
+                self.v[x as usize] = ((k1 << 4) + k2) as u8;
+            },
+            // Add KK to VX, VX=VX+KK
+            (7, x, k1, k2) => {
+                self.v[x as usize] += ((k1 << 4) + k2) as u8;
+            },
+            // Copy VY to VX, VX=VY
+            (8, x, y, 0) => {
+                self.v[x as usize] = self.v[y as usize];
+            },
+            // Logical OR VX with VY, VX=VX│VY
+            (8, x, y, 1) => {
+                let x = x as usize;
+                self.v[x] = self.v[x] | self.v[y as usize];
+            },
+            // Logical AND VX with VY, VX=VX&VY
+            (8, x, y, 2) => {
+                let x = x as usize;
+                self.v[x] = self.v[x] & self.v[y as usize];
+            },
+            // Logical XOR VX with VY, VX=VX XOR VY
+            (8, x, y, 3) => {
+                let x = x as usize;
+                self.v[x] = self.v[x] ^ self.v[y as usize];
+            },
+            // Add VY to VX.If result >FF, then VF=1; VX=VX+VY
+            (8, x, y, 4) => {
+                let x = x as usize;
+                let y = y as usize;
+                let sum = self.v[x] + self.v[y];
+                self.v[0xf] = if sum >= 16 { 1 } else { 0 };
+                self.v[x] = sum % 16;
             },
             _ => println!("{:?}{:?}{:?}{:?} not covered", op0, op1, op2, op3)
         }
@@ -88,5 +121,19 @@ impl CPU {
     }
     fn next(&mut self) {
         self.pc += 2;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::CPU;
+    use super::Memory;
+    #[test]
+    fn test_op_add() {
+        let mut mem = Memory::new();
+        mem.set(0x200, vec![0x6001, 0x6102, 0x8014]);
+        let mut cpu = CPU::new(mem);
+        cpu.run();
+        assert_eq!(cpu.v[0x0], 0x3);
     }
 }
