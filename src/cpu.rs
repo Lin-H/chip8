@@ -112,6 +112,19 @@ impl CPU {
                 self.v[0xf] = if sum >= 16 { 1 } else { 0 };
                 self.v[x] = sum % 16;
             },
+            // Subtract VY. If VX<VY, then VF=0; VX=VX-VY
+            (8, x, y, 5) => {
+                let x = x as usize;
+                let y = y as usize;
+                let sum;
+                if self.v[x] < self.v[y] {
+                    self.v[0xf] = 0;
+                    sum = self.v[y] - self.v[x];
+                } else {
+                    sum = self.v[x] - self.v[y];
+                }
+                self.v[x] = sum;
+            },
             _ => println!("{:?}{:?}{:?}{:?} not covered", op0, op1, op2, op3)
         }
     }
