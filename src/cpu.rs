@@ -10,7 +10,10 @@ pub struct CPU {
     stack: Vec<u16>,
     memory: Memory,
     /* program counter */
-    pc: usize
+    pc: usize,
+    delay_timer: u8,
+    sound_timer: u8,
+    pitch: u8
 }
 
 impl CPU {
@@ -21,7 +24,10 @@ impl CPU {
             i: 0,
             memory,
             stack: Vec::new(),
-            pc: 0x200
+            pc: 0x200,
+            delay_timer: 0,
+            sound_timer: 0,
+            pitch: 0
         }
     }
     pub fn run(&mut self) {
@@ -124,6 +130,66 @@ impl CPU {
                     sum = self.v[x] - self.v[y];
                 }
                 self.v[x] = sum;
+            },
+            // Skip next Instruction if VX≠VY; SKF VX≠VY
+            (9, x, y, 0) => {
+                if self.v[x as usize] != self.v[y as usize] {
+                    self.next();
+                }
+            },
+            // Set memory Index Pointer to MMM; I=MMM
+            (0xA, m1, m2, m3) => {
+                let address = (m1 << 8) + (m2 << 4) + m3;
+                self.pc = address as usize;
+            },
+            // Jump to location MMM+V0; GOTO MMM+V0
+            (0xB, m1, m2, m3) => {
+                let address = (m1 << 8) + (m2 << 4) + m3 + (self.v[0] as u16);
+                self.pc = address as usize;
+            },
+            // Get random byte, then AND with KK; VX=RND.KK
+            (0xC, x, k1, k2) => {
+                println!("Get random byte, then AND with KK")
+            },
+            // Display N-byte pattern at (VX,VY).; SHOW N@VX,VY
+            (0xD, x, y, n) => {
+                println!("Display N-byte pattern at (VX,VY)")
+            },
+            // Skip if key down =VX. No wait.; SKF VX=KEY
+            (0xE, x, 9, 0xE) => {
+                println!("Skip if key down =VX. No wait")
+            },
+            // Skip if key down ≠VX. No wait.; SKF VX≠KEY
+            (0xE, x, 0xA, 1) => {
+                println!("Skip if key down ≠VX. No wait")
+            },
+            // Jump to Monitor (CHIPOS); STOP 
+            (0xF, 0, 0, 0) => {
+                println!("Jump to Monitor (CHIPOS)")
+            },
+            // Set the delay timer to the value of register VX; VX=TIME
+            (0xF, x, 0, 7) => {
+                self.v[x as usize] = self.delay_timer;
+            },
+            // Wait for a keypress and store the result in register VX; VX=KEY
+            (0xF, x, 0, 0xA) => {
+                println!("Wait for a keypress and store the result in register VX")
+            },
+            // Initialize Timer. 01=20 mS.; TIME=VX
+            (0xF, x, 1, 5) => {
+                self.delay_timer = self.v[x as usize];
+            },
+            // Set the Pitch of the Tone Generator to VX.; PITCH=VX
+            (0xF, x, 1, 7) => {
+                self.pitch = self.v[x as usize];
+            },
+            // Sound Tone for 20 timesVX milliseconds; TONE=VX
+            (0xF, x, 1, 8) => {
+                self.sound_timer = self.v[x as usize];
+            },
+            // Add VX to Memory Pointer; I=I+VX
+            (0xF, x, 1, 0xE) => {
+                self.i += x;
             },
             _ => println!("{:?}{:?}{:?}{:?} not covered", op0, op1, op2, op3)
         }
