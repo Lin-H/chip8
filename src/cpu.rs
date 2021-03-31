@@ -44,7 +44,7 @@ impl CPU {
         let op1 = ((op & 0x0f00) >> 8) as usize;
         let op2 = ((op & 0x00f0) >> 4) as usize;
         let op3 = (op & 0x000f) as usize;
-        println!("{:?}, {:?}, {:?}, {:?}", op0, op1, op2, op3);
+        println!("{:X}, {:X}, {:X}, {:X}", op0, op1, op2, op3);
         match (op0, op1, op2, op3) {
             (0, 0, 0, 0) => println!("No Operation"),
             (0, 0, 0xE, 0) => {
@@ -136,7 +136,7 @@ impl CPU {
             // Set memory Index Pointer to MMM; I=MMM
             (0xA, m1, m2, m3) => {
                 let address = (m1 << 8) + (m2 << 4) + m3;
-                self.pc = address;
+                self.i = address as u16;
             },
             // Jump to location MMM+V0; GOTO MMM+V0
             (0xB, m1, m2, m3) => {
@@ -148,9 +148,14 @@ impl CPU {
                 let rand_byte = rand::random::<u8>();
                 self.v[x] = rand_byte & ((k1 << 4) + k2) as u8;
             },
-            // Display N-byte pattern at (VX,VY).; SHOW N@VX,VY
+            // Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
             (0xD, x, y, n) => {
-                println!("Display N-byte pattern at (VX,VY)")
+                println!("Display N-byte pattern at (VX,VY); ");
+                let location = self.i as usize;
+                for i in 0..n {
+                    print!("{:X} ", self.memory.address[location + i]);
+                }
+                println!("");
             },
             // Skip if key down =VX. No wait.; SKF VX=KEY
             (0xE, x, 9, 0xE) => {
@@ -232,11 +237,19 @@ mod tests {
     use super::CPU;
     use super::Memory;
     #[test]
-    fn test_op_add() {
+    fn op_add() {
         let mut mem = Memory::new();
         mem.set(0x200, vec![0x6001, 0x6102, 0x8014]);
         let mut cpu = CPU::new(mem);
         cpu.run();
         assert_eq!(cpu.v[0x0], 0x3);
+    }
+
+    #[test]
+    fn hex_to_decimal_converter() {
+        let mut mem = Memory::new();
+        mem.set(0x200, vec![0x00E0, 0x6380, 0x6400, 0x6500, 0xA500, 0xF333, 0xF265, 0xF029, 0xD455, 0xF129, 0x7408, 0xD455, 0xF229, 0x7408, 0xD455, 0xF000]);
+        let mut cpu = CPU::new(mem);
+        cpu.run();
     }
 }

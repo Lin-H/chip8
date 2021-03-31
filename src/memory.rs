@@ -55,7 +55,7 @@ Number of Tones(-1) at address 0209H.
 mod tests {
     use super::Memory;
     #[test]
-    fn test_memory_set() {
+    fn memory_set() {
         let mut mem = Memory::new();
         mem.set(0x200, vec![0x6001, 0x7002]);
         assert_eq!(mem.address[0x200], 0x60);
