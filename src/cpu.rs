@@ -196,7 +196,7 @@ impl CPU {
             // Set I = location of sprite for digit Vx.
             (0xF, x, 2, 9) => {
                 let digit = self.v[x];
-                self.i = (digit * 2) as u16;
+                self.i = (digit * 5) as u16;
             },
             // Store BCD representation of Vx in memory locations I, I+1, and I+2.
             (0xF, x, 3, 3) => {
@@ -212,13 +212,16 @@ impl CPU {
                 for i in 0..=x {
                     self.memory.address[location + i] = self.v[x];
                 }
+                // 部分文档说S-CHIP8修改i
+                self.i += (x + 1) as u16;
             },
             // Read registers V0 through Vx from memory starting at location I.
             (0xF, x, 6, 5) => {
                 let location = self.i as usize;
                 for i in 0..=x {
-                    self.v[x] = self.memory.address[location + i];
+                    self.v[i] = self.memory.address[location + i];
                 }
+                self.i += (x + 1) as u16;
             },
             _ => println!("{:?}{:?}{:?}{:?} not covered", op0, op1, op2, op3)
         }
