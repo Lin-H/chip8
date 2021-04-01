@@ -12,6 +12,7 @@ use memory::Memory;
 
 pub fn main() -> Result<(), String> {
     let mut chip8 = CPU::new(Memory::new());
+    println!("ad");
     chip8.run();
     // let sdl_context = sdl2::init()?;
     // let video_subsystem = sdl_context.video()?;

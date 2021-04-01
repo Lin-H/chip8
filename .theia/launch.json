@@ -1,0 +1,16 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "gdb",
+            "request": "launch",
+            "name": "Launch Program",
+            "target": "${workspaceFolder}/target/debug/chip8",
+            "cwd": "${workspaceFolder}",
+            "valuesFormatting": "parseText",
+            "arguments": ""
+        }
+    ]
+}
