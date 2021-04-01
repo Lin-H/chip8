@@ -239,6 +239,7 @@ impl CPU {
 mod tests {
     use super::CPU;
     use super::Memory;
+    use rand;
     #[test]
     fn op_add() {
         let mut mem = Memory::new();
@@ -248,11 +249,16 @@ mod tests {
         assert_eq!(cpu.v[0x0], 0x3);
     }
 
+    // 测试将hex显示到屏幕上，转为BCD码逐位显示
     #[test]
     fn hex_to_decimal_converter() {
         let mut mem = Memory::new();
-        mem.set(0x200, vec![0x00E0, 0x6380, 0x6400, 0x6500, 0xA500, 0xF333, 0xF265, 0xF029, 0xD455, 0xF129, 0x7408, 0xD455, 0xF229, 0x7408, 0xD455, 0xF000]);
+        let hex: u8 = rand::random::<u8>();
+        mem.set(0x200, vec![0x00E0, hex as u16 + 0x6300, 0x6400, 0x6500, 0xA500, 0xF333, 0xF265, 0xF029, 0xD455, 0xF129, 0x7408, 0xD455, 0xF229, 0x7408, 0xD455, 0xF000]);
         let mut cpu = CPU::new(mem);
         cpu.run();
+        assert_eq!(hex / 100, cpu.v[0]);
+        assert_eq!(hex / 10 % 10, cpu.v[1]);
+        assert_eq!(hex % 10, cpu.v[2]);
     }
 }

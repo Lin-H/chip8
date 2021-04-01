@@ -10,3 +10,14 @@ a monochrome screen of 64 × 32 pixels. The top-left corner of the screen is ass
    |----------------------------------|
 1F                                    3F,1F
 */
+pub struct Graphics {
+
+}
+
+impl Graphics {
+    pub new() -> Graphics {
+        Graphics {}
+    }
+    pub display(&self) {
+    }
+}
