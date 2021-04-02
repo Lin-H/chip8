@@ -5,5 +5,5 @@ authors = ["Lin-H <lh04667649@qq.com>"]
 edition = "2018"
 
 [dependencies]
-# sdl2 = {version = "*"}
 rand = "0.8.0"
+sdl2 = {version = "0.34", features = ["bundled"]}
