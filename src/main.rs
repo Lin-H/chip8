@@ -6,9 +6,11 @@
 // use std::time::Duration;
 mod cpu;
 mod memory;
+mod graphics;
 
 use cpu::CPU;
 use memory::Memory;
+use graphics::Graphics;
 
 pub fn main() -> Result<(), String> {
     let mut chip8 = CPU::new(Memory::new());
