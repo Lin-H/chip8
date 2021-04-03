@@ -210,7 +210,7 @@ impl CPU {
             (0xF, x, 5, 5) => {
                 let location = self.i as usize;
                 for i in 0..=x {
-                    self.memory.address[location + i] = self.v[x];
+                    self.memory.address[location + i] = self.v[i];
                 }
                 // 部分文档说S-CHIP8修改i
                 self.i += (x + 1) as u16;

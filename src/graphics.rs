@@ -16,9 +16,8 @@ use sdl2::{event::Event, rect::Rect};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use std::time::Duration;
-
 pub struct Graphics {
-    sdl_context: sdl2::Sdl
+    pub sdl_context: sdl2::Sdl
 }
 
 impl Graphics {
