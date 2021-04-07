@@ -2,9 +2,12 @@
 use std::usize;
 use rand;
 
+use std::sync::{Arc, Mutex};
 use super::memory::Memory;
+use super::Graphics;
 
 pub struct CPU {
+    graphics: Arc<Mutex<Graphics>>,
     speed: u16, // 500Hz
     v: [u8; 16], // 16 8bit register
     i: u16,  // 16bit address register
@@ -18,8 +21,9 @@ pub struct CPU {
 }
 
 impl CPU {
-    pub fn new(memory: Memory) -> CPU {
+    pub fn new(memory: Memory, graphics: Arc<Mutex<Graphics>>) -> CPU {
         return CPU {
+            graphics,
             speed: 500,
             v: [0; 16],
             i: 0,

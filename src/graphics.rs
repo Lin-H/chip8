@@ -12,52 +12,32 @@ a monochrome screen of 64 × 32 pixels. The top-left corner of the screen is ass
 */
 extern crate sdl2;
 
-use sdl2::{event::Event, rect::Rect};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
+use sdl2::{event::Event, rect::Rect};
 use std::time::Duration;
+
+enum Operation {
+    Clear,
+    Set(Vec<[u8; 8]>)
+}
+
 pub struct Graphics {
-    pub sdl_context: sdl2::Sdl
+    screen: [[u8;8]; 32],
+    op: Vec<Operation>
 }
 
 impl Graphics {
-    pub fn new() -> Result<Graphics, String> {
-        let sdl_context = sdl2::init()?;
-        let video_subsystem = sdl_context.video()?;
-
-        let window = video_subsystem
-            .window("rust-sdl2 demo: Video", 640, 320)
-            .position_centered()
-            .opengl()
-            .build()
-            .map_err(|e| e.to_string())?;
-        let mut canvas = window.into_canvas()
-            .present_vsync()
-            .build()
-            .map_err(|e| e.to_string())?;
-
-        canvas.set_logical_size(64, 32).unwrap();
-
-        // let mut event_pump = sdl_context.event_pump()?;
-        // 'running: loop {
-        //     for event in event_pump.poll_iter() {
-        //         match event {
-        //             Event::Quit { .. }
-        //             | Event::KeyDown {
-        //                 keycode: Some(Keycode::Escape),
-        //                 ..
-        //             } => break 'running,
-        //             _ => {}
-        //         }
-        //     }
-
-        //     ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
-        //     // The rest of the game loop goes here...
-        // }
-        Ok(Graphics {
-            sdl_context: sdl_context
-        })
+    pub fn new() -> Graphics {
+        Graphics {
+            screen: [[0; 8]; 32],
+            op: vec![]
+        }
     }
-    pub fn display(&self) {
+    pub fn set(&self, pixels: Vec<[u8; 8]>) {
+
+    }
+    pub fn clear(&self) {
+        
     }
 }
