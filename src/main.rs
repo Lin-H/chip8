@@ -49,7 +49,7 @@ pub fn main() -> Result<(), String> {
                     break 'running
                 },
                 _ => {
-                    let g = shared.lock().unwrap();
+                    let mut g = shared.lock().unwrap();
                     g.clear();
                 }
             }

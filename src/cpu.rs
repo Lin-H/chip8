@@ -52,6 +52,7 @@ impl CPU {
         match (op0, op1, op2, op3) {
             (0, 0, 0, 0) => println!("No Operation"),
             (0, 0, 0xE, 0) => {
+                self.graphics.lock().unwrap().clear();
                 println!("Clear the Screen");
             },
             (0, 0, 0xE, 0xE) => println!("Return from Subroutine"),
@@ -156,10 +157,13 @@ impl CPU {
             (0xD, x, y, n) => {
                 println!("Display N-byte pattern at (VX,VY); ");
                 let location = self.i as usize;
+                let mut pixels: Vec<u8> = vec![];
                 for i in 0..n {
+                    pixels.push(self.memory.address[location + i]);
                     print!("{:X} ", self.memory.address[location + i]);
                 }
                 println!("");
+                self.graphics.lock().unwrap().set(self.v[x], self.v[y], pixels);
             },
             // Skip if key down =VX. No wait.; SKF VX=KEY
             (0xE, x, 9, 0xE) => {
@@ -241,14 +245,18 @@ impl CPU {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::{Arc, Mutex};
+
     use super::CPU;
     use super::Memory;
+    use super::Graphics;
     use rand;
     #[test]
     fn op_add() {
+        let graphics = Graphics::new();
         let mut mem = Memory::new();
         mem.set(0x200, vec![0x6001, 0x6102, 0x8014]);
-        let mut cpu = CPU::new(mem);
+        let mut cpu = CPU::new(mem, Arc::new(Mutex::new(graphics)));
         cpu.run();
         assert_eq!(cpu.v[0x0], 0x3);
     }
@@ -256,10 +264,11 @@ mod tests {
     // 测试将hex显示到屏幕上，转为BCD码逐位显示
     #[test]
     fn hex_to_decimal_converter() {
+        let graphics = Graphics::new();
         let mut mem = Memory::new();
         let hex: u8 = rand::random::<u8>();
         mem.set(0x200, vec![0x00E0, hex as u16 + 0x6300, 0x6400, 0x6500, 0xA500, 0xF333, 0xF265, 0xF029, 0xD455, 0xF129, 0x7408, 0xD455, 0xF229, 0x7408, 0xD455, 0xF000]);
-        let mut cpu = CPU::new(mem);
+        let mut cpu = CPU::new(mem, Arc::new(Mutex::new(graphics)));
         cpu.run();
         assert_eq!(hex / 100, cpu.v[0]);
         assert_eq!(hex / 10 % 10, cpu.v[1]);
