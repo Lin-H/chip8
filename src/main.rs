@@ -15,6 +15,8 @@ use std::sync::{Arc, Mutex};
 use sdl2::{event::Event, keyboard::Keycode, rect::Rect};
 
 pub fn main() -> Result<(), String> {
+    let background_color = Color::RGB(37, 17, 1);
+    let foreground_color = Color::RGB(232, 233, 243);
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
 
@@ -27,9 +29,9 @@ pub fn main() -> Result<(), String> {
     let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
     canvas.set_logical_size(64, 32).unwrap();
 
-    canvas.set_draw_color(Color::RGB(255, 255, 255));
+    canvas.set_draw_color(background_color);
     canvas.clear();
-    canvas.set_draw_color(Color::RGB(3, 169, 244));
+    canvas.set_draw_color(foreground_color);
     canvas.fill_rect(Rect::new(10, 1, 30, 30))?;
     canvas.present();
 
@@ -43,19 +45,26 @@ pub fn main() -> Result<(), String> {
     let mut event_pump = sdl_context.event_pump()?;
 
     'running: loop {
+        let mut graphics = shared.lock().unwrap();
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                    graphics.clear();
                     break 'running
                 },
-                _ => {
-                    let mut g = shared.lock().unwrap();
-                    g.clear();
-                }
+                _ => {}
             }
         }
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         // The rest of the game loop goes here...
+        if graphics.need_update {
+            // 清空屏幕
+            if graphics.is_clear {
+                graphics.screen = graphics.buffer.clone();
+                continue;
+            }
+            
+        }
     }
 
     Ok(())

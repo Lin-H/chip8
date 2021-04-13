@@ -12,9 +12,9 @@ a monochrome screen of 64 × 32 pixels. The top-left corner of the screen is ass
 */
 pub struct Graphics {
     pub screen: [u8; 8 * 32],
-    buffer: [u8; 8 * 32],
-    need_update: bool,
-    is_clear: bool,
+    pub buffer: [u8; 8 * 32],
+    pub need_update: bool,
+    pub is_clear: bool,
 }
 
 impl Graphics {
@@ -57,9 +57,48 @@ impl Graphics {
     }
 }
 
+/// big endian
+trait BitSet {
+    /// get bit
+    fn bit(&self, pos: usize) -> bool;
+
+    /// set bit
+    fn set_bit(&mut self, pos: usize, val: bool) -> &mut Self;
+}
+
+impl BitSet for u8 {
+    fn bit(&self, pos: usize) -> bool {
+        if pos >= 8 {
+            assert!(pos < 8);
+        }
+        *self & 1 << pos != 0
+    }
+    fn set_bit(&mut self, pos: usize, val: bool) -> &mut Self {
+        assert!(pos < 8);
+        *self = *self & !(1 << pos) | ((val as u8) << pos);
+        self
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::Graphics;
+    use super::{BitSet, Graphics};
+
+    #[test]
+    fn get_bit() {
+        let i = 5u8;
+        assert!(!i.bit(1));
+        assert!(i.bit(2));
+    }
+
+    #[test]
+    fn set_bit() {
+        let mut i = 5u8;
+        i.set_bit(1, true);
+        assert_eq!(i, 7);
+        i.set_bit(0, false);
+        assert_eq!(i, 6);
+    }
     
     #[test]
     fn set_buffer_0_0() {
