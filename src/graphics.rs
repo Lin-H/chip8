@@ -58,7 +58,7 @@ impl Graphics {
 }
 
 /// big endian
-trait BitSet {
+pub trait BitSet {
     /// get bit
     fn bit(&self, pos: usize) -> bool;
 

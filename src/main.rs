@@ -4,6 +4,7 @@ mod cpu;
 mod memory;
 mod graphics;
 
+use graphics::BitSet;
 use std::time::Duration;
 
 use std::thread;
@@ -12,7 +13,7 @@ use memory::Memory;
 use graphics::Graphics;
 use sdl2::pixels::Color;
 use std::sync::{Arc, Mutex};
-use sdl2::{event::Event, keyboard::Keycode, rect::Rect};
+use sdl2::{event::Event, keyboard::Keycode, rect::{Rect, Point}};
 
 pub fn main() -> Result<(), String> {
     let background_color = Color::RGB(37, 17, 1);
@@ -61,9 +62,37 @@ pub fn main() -> Result<(), String> {
             // 清空屏幕
             if graphics.is_clear {
                 graphics.screen = graphics.buffer.clone();
+                canvas.set_draw_color(background_color);
+                canvas.clear();
                 continue;
             }
-            
+            for i in 0..256 {
+                let screen = graphics.screen[i];
+                let buffer = graphics.buffer[i];
+                if screen == buffer {
+                    continue;
+                }
+                let xor = buffer ^ screen;
+                let bit_one = xor & buffer;
+                let bit_zero = xor & !buffer;
+                let mut points_one: Vec<Point> = Vec::new();
+                let mut points_zero: Vec<Point> = Vec::new();
+                for p in 0..8 {
+                    let x = (i % 8 * 8 + p) as i32;
+                    let y = (i % 8) as i32;
+                    if bit_one.bit(p) {
+                        points_one.push(Point::new(x, y))
+                    }
+                    if bit_zero.bit(p) {
+                        points_zero.push(Point::new(x, y))
+                    }
+                }
+                canvas.set_draw_color(foreground_color);
+                canvas.draw_points(points_one.as_slice())?;
+                canvas.set_draw_color(background_color);
+                canvas.draw_points(points_zero.as_slice())?;
+            }
+            canvas.present();
         }
     }
 
