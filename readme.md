@@ -2,7 +2,7 @@
 
 # chip8 模拟器
 
-[![Build Status](https://travis-ci.com/Lin-H/chip8.svg?branch=master)](https://travis-ci.com/Lin-H/chip8)
+![Build Status](https://github.com/Lin-H/chip8/actions/workflows/rust.yml/badge.svg)
 ![](https://img.shields.io/github/repo-size/Lin-H/chip8)
 ![](https://img.shields.io/github/v/release/Lin-H/chip8?sort=semver)
 
